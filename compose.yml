@@ -1,0 +1,37 @@
+services:
+  main:
+    build:
+      context: ./main
+
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+
+    volumes:
+      # !!!! On fait ça uniquement en développement !!!!
+      - ./main:/app
+
+      - /app/node_modules
+
+    environment:
+      - DEBUG=main:*
+    depends_on:
+      # on indique que le service main dépend d'main_db
+      - main_db
+    command: pnpm dev
+  main_db:
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+
+    environment:
+      POSTGRES_PASSWORD: maindb
+      POSTGRES_USER: maindb
+      POSTGRES_DB: maindb
+    volumes:
+      - main_db_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+  volumes:
+    main_db_data:
